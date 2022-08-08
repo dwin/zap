@@ -51,7 +51,7 @@ func (z *ZapPlugin) New(results []*index.AnalysisResult) (
 
 func (*ZapPlugin) newWithChunkMode(results []*index.AnalysisResult,
 	chunkMode uint32) (segment.Segment, uint64, error) {
-	s := interimPool.Get().(*interim)
+	s := interim{}
 
 	var br bytes.Buffer
 	if s.lastNumDocs > 0 {
@@ -83,13 +83,10 @@ func (*ZapPlugin) newWithChunkMode(results []*index.AnalysisResult,
 	if err == nil && s.reset() == nil {
 		s.lastNumDocs = len(results)
 		s.lastOutSize = len(br.Bytes())
-		interimPool.Put(s)
 	}
 
 	return sb, uint64(len(br.Bytes())), err
 }
-
-var interimPool = sync.Pool{New: func() interface{} { return &interim{} }}
 
 // interim holds temporary working data used while converting from
 // analysis results to a zap-encoded segment
